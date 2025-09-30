@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sakura Studio</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://kit.fontawesome.com/06763759a1.js" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <h1>Sakura Studio</h1>
+  </header>
+
+<div class="tabs">
+  <div class="tab active">
+    <a class="tab-content" data-tab="main"><span><i class="fa-solid fa-house"></i></span></a>
+  </div>
+  <div class="tab">
+    <a class="tab-content" data-tab="news"><span><i class="fa-solid fa-newspaper"></i></span></a>
+  </div>
+  <div class="tab">
+    <a class="tab-content" data-tab="about"><span><i class="fa-solid fa-address-book"></i></span></a>
+  </div>
+  <div class="tab">
+    <a class="tab-content" data-tab="portfolio"><span><i class="fa-solid fa-folder-open"></i></span></a>
+  </div>
+  <div class="tab">
+    <a class="tab-content" data-tab="team"><span><i class="fa-solid fa-user"></i></span></a>
+  </div>
+</div>
+
+<div class="add">
+  <div class="button-add" id="br">
+    <span><i class="fa-solid fa-chevron-left"></i></span>
+  </div>
+  <div class="add-image">
+    <img src="Comics/shellchain.png" alt="Sakura">
+  </div>
+  <div class="button-add" id="bf">
+    <span><i class="fa-solid fa-chevron-right"></i></span>
+  </div>
+</div>
+<script>
+  window.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab-content').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        setTimeout(function() {
+          document.querySelectorAll('.tab').forEach(function(tab) {
+            tab.classList.remove('active');
+          });
+          link.parentElement.classList.add('active');
+          const target = link.getAttribute('data-tab');
+          const sections = document.querySelectorAll('.main');
+          let activeSection = null;
+          sections.forEach(function(section) {
+            if (section.classList.contains('active')) {
+              activeSection = section;
+            }
+          });
+          if (activeSection) {
+            activeSection.classList.remove('active');
+            activeSection.classList.add('deactive');
+            setTimeout(function() {
+              activeSection.classList.remove('deactive');
+              sections.forEach(function(section) {
+                if (section.id === target) {
+                  section.classList.add('deactive');
+                  setTimeout(function() {
+                    section.classList.add('active');
+                    section.classList.remove('deactive');
+                  }, 100);
+                }
+              });
+            }, 100); 
+          } else {
+            sections.forEach(function(section) {
+              if (section.id === target) {
+                section.classList.add('deactive');
+                setTimeout(function() {
+                  section.classList.add('active');
+                  section.classList.remove('deactive');
+                }, 100);
+              }
+            });
+          }
+        }, 100);
+      });
+    });
+  });
+</script>
+
+<section class="main active" id="main">
+  <h2>Main</h2>
+  <p>Your one-stop solution for all your creative needs. Explore our services and portfolio to see how we can bring your ideas to life.</p>
+</section>
+
+<section class="main" id="news">
+  <h2>News</h2>
+  <p>Your one-stop solution for all your creative needs. Explore our services and portfolio to see how we can bring your ideas to life.</p>
+</section>
+
+<section class="main" id="about">
+  <h2>About</h2>
+  <p>Your one-stop solution for all your creative needs. Explore our services and portfolio to see how we can bring your ideas to life.</p>
+</section>
+
+<section class="main" id="portfolio">
+  <h2>Portfolio</h2>
+  <p>Your one-stop solution for all your creative needs. Explore our services and portfolio to see how we can bring your ideas to life.</p>
+</section>
+
+<section class="main" id="team">
+  <h2>Team</h2>
+  <p>Your one-stop solution for all your creative needs. Explore our services and portfolio to see how we can bring your ideas to life.</p>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
