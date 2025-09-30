@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>Discord Login</title></head>
+<body>
+<script>
+  // Извлекаем токен из URL
+  const hash = window.location.hash.substr(1); // убираем #
+  const params = new URLSearchParams(hash);
+  const accessToken = params.get('access_token');
+
+  if (accessToken) {
+    // Запрашиваем данные пользователя
+    fetch('https://discord.com/api/users/@me', {
+      headers: {
+        'Authorization': 'Bearer ' + accessToken
+      }
+    })
+    .then(res => res.json())
+    .then(user => {
+      console.log(user);
+      document.body.innerHTML = `
+        <h1>Привет, ${user.username}#${user.discriminator}</h1>
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" width="100">
+      `;
+    });
+  } else {
+    document.body.innerHTML = '<p>Нет токена</p>';
+  }
+</script>
+</body>
+</html>
