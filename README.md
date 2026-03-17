@@ -1,2 +1,1 @@
 # sakura.github.io
-asd
