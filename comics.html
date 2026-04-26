@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manga Reader — 44 pages</title>
+  <style>
+    :root{--bg:#111;--fg:#eee;--muted:#9aa0a6}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter, -apple-system, Roboto, 'Segoe UI', Arial}
+    .reader{display:flex;flex-direction:column;min-height:100vh}
+    header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);backdrop-filter:blur(4px)}
+    .title{font-weight:600}
+    .controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--fg);padding:8px 10px;border-radius:8px;cursor:pointer}
+    button:active{transform:scale(.98)}
+    input[type=number]{width:70px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--fg)}
+    main{flex:1;display:flex;align-items:center;justify-content:center;padding:16px}
+    .page-wrap{max-width:1000px;width:100%;display:flex;flex-direction:column;align-items:center}
+    img.page{width:100%;height:auto;max-height:80vh;border-radius:6px;box-shadow:0 8px 30px rgba(0,0,0,0.6);background:#222;object-fit:contain}
+    footer{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;color:var(--muted);font-size:14px}
+    .nav{display:flex;gap:8px;align-items:center}
+    .hint{color:var(--muted);font-size:13px}
+    @media (max-width:600px){.controls{display:none}.title{font-size:16px}.page-wrap{padding:6px}}
+  </style>
+</head>
+<body>
+  <!--
+    INSTRUCTIONS:
+    - Place this HTML file in the same folder as an "images" folder (or adjust basePath variable below).
+    - Name your files exactly: 1p.jpg, 2p.jpg, ..., 44p.jpg
+    - Open this HTML in a browser (double-click or via a local server).
+  -->
+  <div class="reader">
+    <header>
+      <div class="title">Manga Reader — 44 pages</div>
+      <div class="controls">
+        <button id="firstBtn" title="Первая страница">⏮</button>
+        <button id="prevBtn" title="Предыдущая">◀</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label for="pageInput" style="font-size:13px;color:var(--muted);">Стр.</label>
+          <input id="pageInput" type="number" min="1" max="44" value="1" />
+          <span style="font-size:13px;color:var(--muted)">/ 44</span>
+        </div>
+        <button id="nextBtn" title="Следующая">▶</button>
+        <button id="lastBtn" title="Последняя страница">⏭</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-wrap">
+        <img id="pageImg" class="page" alt="manga page" src="" draggable="false" />
+        <div style="height:12px"></div>
+        <div class="nav" style="align-self:stretch;justify-content:center">
+          <button id="zoomOut" title="Уменьшить">−</button>
+          <button id="fitBtn" title="По ширине/высоте">Вписать</button>
+          <button id="zoomIn" title="Увеличить">＋</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="hint">← → — переключение, P — предыдущая, N — следующая, клавиши 1–9 — перейти на страницу</div>
+      <div class="hint">Файлы: <span id="filePattern">{n}p.jpg</span></div>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+  const TOTAL = 44;
+  // Пример: './comic/', 'comic', '/comic/', 'https://example.com/comic/'
+  let basePath = './comic/';
+  const ext = '.jpg';
+
+  // Нормализует basePath один раз: возвращает либо абсолютный URL, либо root-relative с завершающим '/'
+  function normalizeBasePath(p) {
+    if (!p) return '/';
+    // если полный URL (http/https) — убедиться в завершающем '/'
+    if (/^https?:\/\//i.test(p)) {
+      return p.replace(/\/?$/,'') + '/';
+    }
+    // если начинается с '/' — root-relative
+    if (p.startsWith('/')) {
+      return p.replace(/\/?$/,'') + '/';
+    }
+    // относительный — убрать ведущие ./ и вернуть root-relative
+    return '/' + p.replace(/^\.?\//,'').replace(/\/?$/,'') + '/';
+  }
+  basePath = normalizeBasePath(basePath);
+
+  const img = document.getElementById('pageImg');
+  const input = document.getElementById('pageInput');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const firstBtn = document.getElementById('firstBtn');
+  const lastBtn = document.getElementById('lastBtn');
+  const fitBtn = document.getElementById('fitBtn');
+  const zoomIn = document.getElementById('zoomIn');
+  const zoomOut = document.getElementById('zoomOut');
+
+  let page = 1;
+  let scale = 1; // scale multiplier for zoom
+  let fitMode = 'contain'; // 'contain' or 'cover'
+
+  // Возвращает корректный URL (root-relative или абсолютный)
+  function filenameFor(n){
+    const filename = `${n}p${ext}`; // например "1p.jpg"
+    // если basePath — абсолютный URL (начинается с http), просто конкатенируем
+    if (/^https?:\/\//i.test(basePath)) {
+      return basePath + filename;
+    }
+    // иначе возвращаем root-relative (начинается с '/')
+    return basePath + filename;
+  }
+
+      function showPage(n){
+        if (n < 1) n = 1;
+        if (n > TOTAL) n = TOTAL;
+        page = n;
+        input.value = page;
+        // set src to new image; add cache-busting removed to allow caching
+        img.src = filenameFor(page);
+        img.style.objectFit = fitMode;
+        img.style.transform = `scale(${scale})`;
+        preload(page + 1);
+        preload(page - 1);
+      }
+
+      function preload(n){ if (n<1||n>TOTAL) return; const i=new Image(); i.src = filenameFor(n); }
+
+      // controls
+      prevBtn.addEventListener('click', ()=> showPage(page-1));
+      nextBtn.addEventListener('click', ()=> showPage(page+1));
+      firstBtn.addEventListener('click', ()=> showPage(1));
+      lastBtn.addEventListener('click', ()=> showPage(TOTAL));
+
+      input.addEventListener('change', ()=> {
+        const v = Math.floor(Number(input.value)||1);
+        showPage(v);
+      });
+
+      fitBtn.addEventListener('click', ()=>{
+        fitMode = (fitMode === 'contain') ? 'cover' : 'contain';
+        img.style.objectFit = fitMode;
+      });
+      zoomIn.addEventListener('click', ()=>{ scale = Math.min(3, +(scale + 0.2).toFixed(2)); img.style.transform = `scale(${scale})`; });
+      zoomOut.addEventListener('click', ()=>{ scale = Math.max(0.5, +(scale - 0.2).toFixed(2)); img.style.transform = `scale(${scale})`; });
+
+      // keyboard
+      window.addEventListener('keydown', (e)=>{
+        if (e.key === 'ArrowLeft') showPage(page-1);
+        if (e.key === 'ArrowRight') showPage(page+1);
+        if (e.key.toLowerCase() === 'p') showPage(page-1);
+        if (e.key.toLowerCase() === 'n') showPage(page+1);
+        // digits quick jump (1..9) -> jump to 1..9 * (TOTAL/9)
+        if (/^[1-9]$/.test(e.key)){
+          const num = Number(e.key);
+          const target = Math.min(TOTAL, Math.round((num/9) * TOTAL) || 1);
+          showPage(target);
+        }
+      });
+
+      // touch: swipe support
+      let touchStartX = null;
+      img.addEventListener('touchstart', (ev)=>{ touchStartX = ev.touches[0].clientX; });
+      img.addEventListener('touchend', (ev)=>{
+        if (touchStartX === null) return;
+        const diff = (ev.changedTouches[0].clientX - touchStartX);
+        if (Math.abs(diff) > 40){ if (diff < 0) showPage(page+1); else showPage(page-1); }
+        touchStartX = null;
+      });
+
+      // prevent image drag and double-click selection
+      img.addEventListener('dragstart', e => e.preventDefault());
+      img.addEventListener('dblclick', ()=>{ if(scale===1){ scale=1.5 } else { scale=1 } img.style.transform=`scale(${scale})`; });
+
+      // show placeholder while loading and handle errors
+      img.addEventListener('error', ()=>{ img.alt = 'Ошибка загрузки изображения. Проверьте, что файлы названы правильно.'; });
+
+      // init
+      document.getElementById('filePattern').textContent = "{n}p.jpg";
+      showPage(1);
+    })();
+  </script>
+</body>
+</html>

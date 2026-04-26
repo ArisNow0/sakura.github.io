@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sakura Studio</title>
+  <title>Punch-o Studio</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <script src="https://kit.fontawesome.com/06763759a1.js" crossorigin="anonymous"></script>
@@ -12,11 +12,7 @@
 </head>
 <body>
   <header class="header">
-    <h1>Sakura Studio</h1>
-    <a href="https://discord.com/oauth2/authorize?client_id=1190743147622432898&redirect_uri=https://arisnow0.github.io/sakura.github.io/callback&response_type=token&scope=identify%20email">
-  Войти через Discord
-</a>
-
+    <h1>Punch-o Studio</h1>
   </header>
 
 <div class="tabs">
@@ -35,67 +31,62 @@
   <div class="tab">
     <a class="tab-content" data-tab="team"><span><i class="fa-solid fa-user"></i></span></a>
   </div>
+
+  <div class="language">
+    <a class="tab-content" data-tab="language"><span><i class="fa-solid fa-language"></i></span></a>
+  </div>
 </div>
 
-<div class="add">
-  <div class="button-add" id="br">
-    <span><i class="fa-solid fa-chevron-left"></i></span>
-  </div>
-  <div class="add-image">
-    <img src="Comics/shellchain.png" alt="Sakura">
-  </div>
-  <div class="button-add" id="bf">
-    <span><i class="fa-solid fa-chevron-right"></i></span>
-  </div>
-</div>
 <script>
-  window.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.tab-content').forEach(function(link) {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        setTimeout(function() {
-          document.querySelectorAll('.tab').forEach(function(tab) {
-            tab.classList.remove('active');
-          });
-          link.parentElement.classList.add('active');
-          const target = link.getAttribute('data-tab');
-          const sections = document.querySelectorAll('.main');
-          let activeSection = null;
-          sections.forEach(function(section) {
-            if (section.classList.contains('active')) {
-              activeSection = section;
-            }
-          });
-          if (activeSection) {
-            activeSection.classList.remove('active');
-            activeSection.classList.add('deactive');
-            setTimeout(function() {
-              activeSection.classList.remove('deactive');
-              sections.forEach(function(section) {
-                if (section.id === target) {
-                  section.classList.add('deactive');
-                  setTimeout(function() {
-                    section.classList.add('active');
-                    section.classList.remove('deactive');
-                  }, 100);
-                }
-              });
-            }, 100); 
-          } else {
-            sections.forEach(function(section) {
-              if (section.id === target) {
-                section.classList.add('deactive');
-                setTimeout(function() {
-                  section.classList.add('active');
-                  section.classList.remove('deactive');
-                }, 100);
-              }
-            });
+window.addEventListener('DOMContentLoaded', () => {
+  const tabs = document.querySelectorAll('.tab-content');
+  const sections = document.querySelectorAll('.main');
+  let anim = false;
+  const activate = target => {
+    if (anim) return;
+    anim = true;
+    if (target === "language") {
+      anim = false;
+      return;
+    }
+    const current = document.querySelector('.main.active');
+    if (current && current.id !== target) {
+      current.classList.add('deactive');
+      current.classList.remove('active');
+      setTimeout(() => {
+        current.classList.remove('deactive');
+        sections.forEach(s => {
+          if (s.id === target) {
+            s.classList.add('deactive');
+            setTimeout(() => {
+              s.classList.add('active');
+              s.classList.remove('deactive');
+              anim = false;
+            }, 50);
           }
-        }, 100);
-      });
-    });
+        });
+      }, 200);
+    } else {
+      anim = false;
+    }
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const link = document.querySelector(`.tab-content[data-tab="${target}"]`);
+    if (link) link.parentElement.classList.add('active');
+  };
+  tabs.forEach(link => link.addEventListener('click', e => {
+    e.preventDefault();
+    const t = link.dataset.tab;
+    if (t === "language") return;
+    history.pushState({ tab: t }, '', `${location.pathname}?tab=${t}`);
+    activate(t);
+  }));
+  const param = new URLSearchParams(location.search).get('tab') || 'main';
+  activate(param);
+  window.addEventListener('popstate', e => {
+    const t = (e.state && e.state.tab) || new URLSearchParams(location.search).get('tab') || 'main';
+    activate(t);
   });
+});
 </script>
 
 <section class="main active" id="main">
@@ -114,14 +105,109 @@
 </section>
 
 <section class="main" id="portfolio">
-  <h2>Portfolio</h2>
-  <p>Your one-stop solution for all your creative needs. Explore our services and portfolio to see how we can bring your ideas to life.</p>
+  <div class="scrollbox">
+  <h2>Projects</h2>
+    <div class="section-content">
+      <h2>Manga</h2>
+      <div class="projects-grid">
+        <div class="project-card comics down" name="JoJo no Kimyo na Boken Sono" wrapper="images/jojo.png" meta="1 Том 45 Глав" description="Эта история берёт своё начало в конце XIX века, повествуя нам о двух сводных братьях — Джонатане Джостаре и Дио Брандо.<br><br>Проливной дождь, грозовая ночь и неосторожное вождение кареты обернулось трагедией в молодой семье. Человек по имени Дарио Брандо, случайно оказавшийся на месте аварии, никогда не отличавшийся хорошими манерами и представлениями о жизни, решил обокрасть пострадавшего аристократа. Но, к его сожалению или к счастью, мужчина оказался жив. Поблагодарив Дарио за спасение жизни, сэр Джостар, как истинный джентльмен, пообещал не остаться в долгу. <br>Спустя двенадцать лет, умирая, Дарио через сына, что его ненавидел, передал Джостару письмо с просьбой приютить молодого отпрыска. После смерти отца, Дио Брандо отправился в поместье, где мгновенно испортил отношения с единственным сыном владельца дома, Джонатаном Джостаром по прозвищу ДжоДжо. ДжоДжо усердно старался выглядеть приличным джентльменом, но ему это плохо удавалось, а с появлением Дио, его беззаботная жизнь и вовсе превратилась в сущий кошмар. <br><br>Превратности судьбы нам неизвестны, но случайно ли пересечение этих двух противоположностей? Какие сюрпризы ожидают молодых людей? И какова роль загадочной маски в этой истории?" kofi="true" id="jojo">
+          <img src="images/jojo.png" alt="JoJo cover">
+          <img class="project-title" style="width: 80%;" src="images/jojo_title.png" alt="JoJo's Bizarre Adventure">
+        </div>
+        <div class="project-card comics center" name="EchoRoad" wrapper="images/EchoRoad_title_full.png" meta="1 Том 1 Глава" description="Коли Бог життя помер, його серце розірвалося на тисячі відлунь — і кожне стало силою.<br>Тепер Обрані — нащадки того бога — б’ються за славу, виживання і правду про походження своєї сили.<br>Орвен Хофман, хлопець із Ехо “Heartbeat”, мріє стати популярним героєм.<br>Але коли Нищий виривається у місто, його жартівливий порив обертається на боротьбу за життя…<br>На Дорозі Відлунь кожен удар серця — крок до божества.<br>Або — до забуття." kofi="true" id="echoroad">
+          <img src="images/EchoRoad.png" alt="EchoRoad cover">
+          <img class="project-title" style="width: 90%;" src="images/EchoRoad_title.png" alt="EchoRoad">
+        </div>
+        <div class="project-card comics down">
+          <img src="images/Horimia.png" alt="Horimiya cover">
+          <img class="project-title" style="width: 95%;" src="images/horimiya_title.png" alt="Horimiya">
+        </div>
+        <div class="project-card comics down">
+          <img src="images/DrStone.png" alt="Dr. Stone cover">
+          <img class="project-title" style="width: 90%;" src="images/drstone_title.png" alt="Dr. Stone">
+        </div>
+        <div class="project-card comics up">
+          <img src="images/OnePunchMan.png" alt="One Punch Man cover">
+          <img class="project-title" style="width: 95%;" src="images/onepunchman_title.png" alt="One Punch Man">
+        </div>
+      </div>
+    </div>
+        <div class="section-content">
+      <h2>Games</h2>
+      <div class="projects-grid">
+        <div class="project-card games down" name="button">
+          <img src="images/jojo.png" alt="JoJo cover">
+          <img class="project-title" style="width: 80%;" src="images/jojo_title.png" alt="JoJo's Bizarre Adventure">
+        </div>
+        <div class="project-card games down" name="EchoRoad">
+          <img src="images/EchoRoad.png" alt="EchoRoad cover">
+          <img class="project-title" style="width: 90%;" src="images/EchoRoad_title.png" alt="EchoRoad">
+        </div>
+        <div class="project-card games down">
+          <img src="images/Horimia.png" alt="Horimiya cover">
+          <img class="project-title" style="width: 95%;" src="images/horimiya_title.png" alt="Horimiya">
+        </div>
+        <div class="project-card games down">
+          <img src="images/DrStone.png" alt="Dr. Stone cover">
+          <img class="project-title" style="width: 90%;" src="images/drstone_title.png" alt="Dr. Stone">
+        </div>
+        <div class="project-card games up">
+          <img src="images/OnePunchMan.png" alt="One Punch Man cover">
+          <img class="project-title" style="width: 95%;" src="images/onepunchman_title.png" alt="One Punch Man">
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+
 
 <section class="main" id="team">
   <h2>Team</h2>
   <p>Your one-stop solution for all your creative needs. Explore our services and portfolio to see how we can bring your ideas to life.</p>
 </section>
+
+<div class="modal-overlay" id="modalProject">
+  <div class="modal-window">
+    <button class="modal-close" id="modalclose">✕</button>
+
+
+    <div class="modal-body">
+      <div class="modal-left">
+       <div class="modal-header">
+        Name
+      </div>
+        <div class="modal-cover-wrapper">
+          <img src="images/EchoRoad_title_full.png" alt="EchoRoad cover" class="modal-cover">
+        </div>
+        <div class="modal-meta">
+          99 томів 999 глав
+        </div>
+      </div>
+
+      <div class="modal-right">
+        <div class="modal-description">
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla<br>
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla<br>
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla<br>
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla<br>
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla<br>
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla<br>
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla<br>
+          Blib Blob Bla Blib Blob Bla Blib Blob Bla Blib Blob Bla
+        </div>
+
+        <div class="modal-btn">
+          <button class="modal-read-btn" href="comics.html/?tab=echoroad">
+            Читати
+          </button>
+          <div class="kofi-button" style="margin-top: 10px;">
+            <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init(' Read the full manga on Ko-fi', '#111', 'C0C51L7H8P');kofiwidget2.draw();</script>
+          </div>  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>
